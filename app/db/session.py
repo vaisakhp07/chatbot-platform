@@ -1,9 +1,11 @@
+# session.py
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
-# PostgreSQL does NOT need connect_args
-engine = create_engine(settings.DATABASE_URL)  
+Base = declarative_base()
+
+engine = create_engine(settings.DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

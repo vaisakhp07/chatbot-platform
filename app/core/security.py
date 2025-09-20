@@ -1,17 +1,21 @@
-import jwt
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
+import jwt
+from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Hash and verify password
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict, secret: str, algorithm: str, expires_delta: int):
+# JWT Token
+def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    import datetime
-    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=expires_delta)
+    expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=60))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, secret, algorithm=algorithm)
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm="HS256")
+    return encoded_jwt

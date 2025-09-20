@@ -1,25 +1,34 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.db import models
+from typing import List
 from app.db.session import get_db
-from jose import jwt, JWTError
-from app.core.config import settings
+from app.db import models
+from app.schemas import ProjectCreate, ProjectResponse
+from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/api/projects", tags=["projects"])
+router = APIRouter(prefix="/projects", tags=["Projects"])
 
-def get_current_user(token: str, db: Session):
-    try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
-        user = db.query(models.User).filter(models.User.id == payload.get("sub")).first()
-        return user
-    except JWTError:
-        return None
+# Create Project
+@router.post("/", response_model=ProjectResponse)
+def create_project(
+    project: ProjectCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    new_project = models.Project(
+        name=project.name,
+        description=project.description,
+        owner_id=current_user.id
+    )
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+    return new_project
 
-@router.post("/")
-def create_project(name: str, description: str = "", db: Session = Depends(get_db), token: str = ""):
-    user = get_current_user(token, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    project = models.Project(name=name, description=description, owner=user)
-    db.add(project); db.commit(); db.refresh(project)
-    return {"id": project.id, "name": project.name}
+# Get all projects for current user
+@router.get("/", response_model=List[ProjectResponse])
+def get_projects(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()
