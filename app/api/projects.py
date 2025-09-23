@@ -1,34 +1,26 @@
-from fastapi import APIRouter, Depends
+# Location: app/api/projects.py
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
-from app.db.session import get_db
 from app.db import models
-from app.schemas import ProjectCreate, ProjectResponse
-from app.api.auth import get_current_user
+from app.db.database import get_db
+from app.api.auth import get_current_user  # Your JWT dependency
 
-router = APIRouter(prefix="/projects", tags=["Projects"])
+router = APIRouter(
+    prefix="/projects",
+    tags=["projects"]
+)
 
-# Create Project
-@router.post("/", response_model=ProjectResponse)
-def create_project(
-    project: ProjectCreate,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
-):
-    new_project = models.Project(
-        name=project.name,
-        description=project.description,
-        owner_id=current_user.id
-    )
+# Get all projects for logged-in user
+@router.get("/")
+def get_projects(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    projects = db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()
+    return projects
+
+# Create a new project
+@router.post("/")
+def create_project(title: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    new_project = models.Project(title=title, owner_id=current_user.id)
     db.add(new_project)
     db.commit()
     db.refresh(new_project)
     return new_project
-
-# Get all projects for current user
-@router.get("/", response_model=List[ProjectResponse])
-def get_projects(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
-):
-    return db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()

@@ -1,17 +1,28 @@
 from fastapi import FastAPI
-from app.api import auth, projects, chat
+from fastapi.middleware.cors import CORSMiddleware
+from app.db.database import Base, engine
 from app.db import models
-from app.db.session import engine
+from app.api import auth, chat
+from dotenv import load_dotenv
 
-models.Base.metadata.create_all(bind=engine)
+load_dotenv()
 
-app = FastAPI(title="Chatbot Platform API")
+# Create tables
+Base.metadata.create_all(bind=engine)
+print("Tables created successfully")
 
-# Include routers
-app.include_router(auth.router, prefix="/auth")
-app.include_router(projects.router)  # already has prefix="/projects"
-app.include_router(chat.router)      # already has prefix="/chats"
+app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"msg": "Chatbot Platform API is running!"}
+# CORS
+origins = ["http://localhost:5173"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routers
+app.include_router(auth.router)
+app.include_router(chat.router)

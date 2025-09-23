@@ -1,46 +1,24 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
-from datetime import datetime
+# app/schemas.py
+from pydantic import BaseModel
 
-# ----- User Schemas -----
-class UserCreate(BaseModel):
-    email: EmailStr
+class LoginRequest(BaseModel):
+    email: str
     password: str
 
-class UserResponse(BaseModel):
-    id: int
-    email: EmailStr
-    created_at: datetime
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-    class Config:
-        orm_mode = True
-
-# ----- Project Schemas -----
-class ProjectCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-class ProjectResponse(BaseModel):
-    id: int
-    name: str
-    description: Optional[str]
-    owner_id: int
-
-    class Config:
-        orm_mode = True
-
-# ----- Chat Schemas -----
 class ChatCreate(BaseModel):
     message: str
-    project_id: Optional[int] = None
+    project_id: int
 
 class ChatResponse(BaseModel):
     id: int
     message: str
     response: str
     user_id: int
-    project_id: Optional[int]
-    created_at: datetime
+    project_id: int
 
     class Config:
         orm_mode = True

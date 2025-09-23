@@ -1,38 +1,98 @@
 import { useState } from "react";
-import axios from "axios";
 
 function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [chat, setChat] = useState([]);
+  const [chats, setChats] = useState([]); // store full chat history
 
+  // Login function
+  const login = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Login failed");
+      }
+
+      const data = await res.json();
+      localStorage.setItem("access_token", data.access_token);
+      alert("Login successful! Token saved.");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  // Send chat message
   const sendMessage = async () => {
-    const res = await axios.post("http://localhost:8000/api/chat/", {
-      user_message: message,
-    });
-    setChat([...chat, { role: "user", text: message }, { role: "assistant", text: res.data.assistant }]);
-    setMessage("");
+    if (!message) return;
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch("http://localhost:8000/chats/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ project_id: 1, message }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to send message");
+      }
+
+      const data = await res.json();
+
+      // Add user message and bot response to chat history
+      setChats((prev) => [
+        ...prev,
+        { sender: "You", message: data.message },
+        { sender: "Bot", message: data.response },
+      ]);
+
+      setMessage(""); // clear input
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
-    <div className="p-8 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Chatbot Platform</h1>
-      <div className="border p-4 h-96 overflow-y-auto">
-        {chat.map((c, i) => (
-          <p key={i} className={c.role === "user" ? "text-blue-600" : "text-green-600"}>
-            <strong>{c.role}:</strong> {c.text}
-          </p>
+    <div style={{ padding: "2rem" }}>
+      <h2>Login</h2>
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={login}>Login</button>
+
+      <h2>Chat</h2>
+      <input
+        placeholder="Enter message"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button onClick={sendMessage}>Send</button>
+
+      <h3>Conversation:</h3>
+      <div style={{ border: "1px solid #ccc", padding: "1rem", maxHeight: "300px", overflowY: "scroll" }}>
+        {chats.map((c, idx) => (
+          <div key={idx}>
+            <b>{c.sender}:</b> {c.message}
+          </div>
         ))}
-      </div>
-      <div className="mt-4 flex">
-        <input
-          className="border flex-grow p-2"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message..."
-        />
-        <button onClick={sendMessage} className="bg-blue-500 text-white px-4">
-          Send
-        </button>
       </div>
     </div>
   );
