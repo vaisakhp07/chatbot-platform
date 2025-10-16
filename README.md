@@ -1,57 +1,52 @@
-# Chatbot Platform (Minimal Version)
+# Chatbot Platform 🚀
 
-A minimal version of a **Chatbot Platform** built with **FastAPI** (backend) and **React** (frontend). Users can register, log in, create projects/agents, and interact with an AI-powered chatbot.
+A full-stack **Chatbot Platform** built with **FastAPI** (backend) and **React** (frontend), featuring modern DevOps practices including Docker, CI/CD, and automated deployments.
 
-> ⚠️ Note: This is a work-in-progress project. Some features described in the original specification are not yet fully implemented.
+## 🏗️ Architecture
 
----
-
-## Features Implemented
-
-### Authentication & User Management
-- User registration and login using **JWT tokens**
-- Password hashing and verification
-- Protected routes for chat access
-
-### Projects / Agents
-- Create projects associated with a user
-- Associate prompts/messages with a project
-- Each project can have multiple chat sessions
-
-### Chat Interface
-- Simple frontend in React
-- Chat with AI-powered agent
-- Uses **OpenAI GPT API** for responses
-- Token-based authorization to secure chat API
-
----
-
-## Features Pending / Not Yet Implemented
-
-- File upload and management using OpenAI Files API
-- Advanced analytics or integrations
-- Full project dashboard
-- UI improvements and better frontend styling
-- OAuth2 or additional authentication flows
-- Multi-agent support per user
-
----
-
-## Tech Stack
-
-- **Backend:** FastAPI, SQLAlchemy, PostgreSQL, Python 3.10+
-- **Frontend:** React, Vite
-- **AI Integration:** OpenAI GPT API
+### Tech Stack
+- **Backend:** FastAPI, SQLAlchemy, SQLite/PostgreSQL, Python 3.11
+- **Frontend:** React, Vite, CSS3
+- **AI Integration:** OpenRouter GPT-3.5 Turbo
 - **Authentication:** JWT tokens
-- **Environment Management:** dotenv
+- **Database:** SQLite (Development), PostgreSQL (Production)
+- **DevOps:** Docker, Docker Compose, GitHub Actions, Nginx
 
----
+## 🚀 Features
 
-## Setup Instructions
+### ✅ Implemented
+- **User Authentication** - JWT-based registration/login
+- **Project Management** - Create and manage chat projects
+- **AI-Powered Chat** - Real-time conversations with GPT-3.5
+- **Chat Persistence** - Messages survive logout/login cycles
+- **Containerized** - Docker support for development and production
+- **CI/CD Pipeline** - Automated testing and deployment
 
-### Backend
+### 🔄 In Progress
+- File upload and management
+- Advanced analytics dashboard
+- Multi-agent support
+- Production deployment automation
 
-1. Clone the repository:
-   ```bash
-   git clone <repo_url>
-   cd chatbot-platform
+## 🛠️ Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- OpenRouter API Key ([Get one here](https://openrouter.ai/))
+
+### Development with Docker
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/chatbot-platform
+cd chatbot-platform
+
+# Create environment file
+echo "OPENAI_API_KEY=your-openrouter-key-here" > .env
+
+# Start development environment
+docker-compose up --build
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
