@@ -1,26 +1,87 @@
-# Location: app/api/projects.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.db import models
+from typing import List
+
 from app.db.database import get_db
-from app.api.auth import get_current_user  # Your JWT dependency
+from app.db.models import User, Project
+from app.api.auth import get_current_user  # This is correct - importing from auth
+from app.schemas import ProjectCreate, ProjectResponse
 
-router = APIRouter(
-    prefix="/projects",
-    tags=["projects"]
-)
+router = APIRouter()
 
-# Get all projects for logged-in user
-@router.get("/")
-def get_projects(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    projects = db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()
+@router.post("/", response_model=ProjectResponse)
+def create_project(
+    project_data: ProjectCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    project = Project(
+        name=project_data.name,
+        description=project_data.description,
+        # model=project_data.model,
+        user_id=current_user.id
+    )
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project
+
+@router.get("/", response_model=List[ProjectResponse])
+def get_projects(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    projects = db.query(Project).filter(Project.user_id == current_user.id).all()
     return projects
 
-# Create a new project
-@router.post("/")
-def create_project(title: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    new_project = models.Project(title=title, owner_id=current_user.id)
-    db.add(new_project)
+@router.get("/{project_id}", response_model=ProjectResponse)
+def get_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    return project
+
+@router.delete("/{project_id}")
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    db.delete(project)
     db.commit()
-    db.refresh(new_project)
-    return new_project
+    
+    return {"message": "Project deleted successfully"}
+
+@router.post("/", response_model=ProjectResponse)
+def create_project(
+    project_data: ProjectCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    project = Project(
+        name=project_data.name,
+        description=project_data.description,
+        # Remove this line: model=project_data.model,
+        user_id=current_user.id
+    )
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project
