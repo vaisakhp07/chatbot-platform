@@ -37,7 +37,7 @@ A full-stack **Chatbot Platform** built with **FastAPI** (backend) and **React**
 ### Development with Docker
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/chatbot-platform
+git clone https://github.com/vaisakhp07/chatbot-platform
 cd chatbot-platform
 
 # Create environment file
@@ -50,3 +50,4 @@ docker-compose up --build
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8000
 # API Docs: http://localhost:8000/docs
+
