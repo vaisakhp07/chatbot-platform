@@ -1,23 +1,12 @@
-# docker-compose.yml
-version: '3.8'
+# Updated docker-compose.yml
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/chatbot
-    depends_on:
-      - db
-
-  db:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=chatbot
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
+      - DATABASE_URL=sqlite:///./app.db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      - ./app.db:/app/app.db  # Mount SQLite database file
