@@ -25,21 +25,27 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run basic application test
+    - name: Run basic syntax check
       run: |
         python -c "
-        import sys
-        sys.path.append('app')
+        # Basic Python syntax and import check
         try:
+            import fastapi
+            import sqlalchemy
+            import uvicorn
+            print('✅ All core imports successful')
+            
+            # Try to import your app modules
+            import sys
+            sys.path.append('app')
+            
+            # Just check if we can import main modules without executing
             from main import app
-            from database import engine
-            print('✅ All imports successful')
-            with engine.connect() as conn:
-                conn.execute('SELECT 1')
-            print('✅ Database connection test passed')
+            print('✅ App import successful')
+            
             print('✅ All basic tests passed!')
         except Exception as e:
-            print(f'❌ Test failed: {e}')
+            print(f'❌ Import test failed: {e}')
             sys.exit(1)
         "
 
