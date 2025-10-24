@@ -21,12 +21,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create database tables on startup
+# Create database tables on startup - only if DATABASE_URL is available
 @app.on_event("startup")
 def startup_event():
     from app.db.database import create_tables
     create_tables()
-    print("✅ Application startup complete - database ready")
+    print("✅ Application startup complete")
 
 # Include API routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
