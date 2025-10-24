@@ -47,3 +47,16 @@ async def test_db(db: Session = Depends(get_db)):
         return {"database": "connected", "test_query": "success"}
     except Exception as e:
         return {"database": "error", "error": str(e)}
+# Create database tables on startup
+@app.on_event("startup")
+def startup_event():
+    from app.db.database import create_tables
+    create_tables()
+    print("✅ Application startup complete - database ready")
+
+# Create database tables on startup
+@app.on_event("startup")
+def startup_event():
+    from app.db.database import create_tables
+    create_tables()
+    print("✅ Application startup complete - database ready")
