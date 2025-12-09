@@ -1,0 +1,15 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+node_modules
+dist
+uploads
+*.db
+*.sqlite*
+Dockerfile*
+docker-compose.yml
+.github

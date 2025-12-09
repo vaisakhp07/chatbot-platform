@@ -1,12 +1,13 @@
-# Updated docker-compose.yml
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.optimized
+    build: .
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=sqlite:///./app.db
-    volumes:
-      - ./app.db:/app/app.db  # Mount SQLite database file
+    env_file:
+      - .env.development
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M

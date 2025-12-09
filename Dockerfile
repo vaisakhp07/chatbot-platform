@@ -1,20 +1,28 @@
+#... satge 1 .....
+
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y gcc libffi-dev python3-dev
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+#... stage 2 ...
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y curl
-
-# Copy requirements and install system-wide
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-# Copy application code
+COPY --from=builder /usr/local /usr/local
 COPY . .
 
-# Create non-root user
-RUN useradd -m -r appuser && chown -R appuser /app
+RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
-# Start command
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
+
